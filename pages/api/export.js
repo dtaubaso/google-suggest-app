@@ -45,7 +45,7 @@ export default async function handler(req, res) {
 
     const bom = '\ufeff';
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="search_logs_export_${Date.now()}.csv"`);
+    res.setHeader('Content-Disposition', `attachment; filename="search_logs_export_${Date.now()}_${crypto.randomUUID()}.csv"`);
     
     res.status(200).send(bom + csv);
 
