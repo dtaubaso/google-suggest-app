@@ -6,8 +6,8 @@ import { Redis } from '@upstash/redis';
 
 // 💡 Inicializar el cliente Redis (Usará las variables de entorno inyectadas por Vercel)
 const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+  url: process.env.KV_REST_API_URL,
+  token: process.env.KV_REST_API_TOKEN,
 });
 
 // --- Definiciones Globales ---
