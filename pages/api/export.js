@@ -37,7 +37,7 @@ export default async function handler(req, res) {
     }
 
     const rawLogs = await redis.mget(...keys);
-    const logs = rawLogs.map(jsonString => JSON.parse(jsonString)).filter(log => log !== null);
+    const logs = rawLogs.filter(log => log !== null);
     
     const csv = parse(logs, {
         fields: ['keyword', 'country', 'language', 'date']
