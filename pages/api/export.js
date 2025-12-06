@@ -2,6 +2,7 @@
 
 import { Redis } from '@upstash/redis'; 
 import { parse } from 'json2csv'; 
+import { v4 as uuidv4 } from 'uuid'
 // ... (inicialización de Redis) ...
 
 // 💡 Se recomienda instalar el cliente redis fuera del handler
@@ -44,8 +45,10 @@ export default async function handler(req, res) {
     });
 
     const bom = '\ufeff';
+    const uniqueId = uuidv4();
+    const filename = `search_logs_export_${uniqueId}.csv`;
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="search_logs_export_${Date.now()}_${crypto.randomUUID()}.csv"`);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     
     res.status(200).send(bom + csv);
 
