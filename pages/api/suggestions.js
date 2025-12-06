@@ -2,6 +2,13 @@
 
 import fetch from 'node-fetch';
 import { parseStringPromise } from 'xml2js'; 
+import { Redis } from '@upstash/redis';
+
+// 💡 Inicializar el cliente Redis (Usará las variables de entorno inyectadas por Vercel)
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
 
 // --- Definiciones Globales ---
 const questionSets = {
@@ -89,5 +96,26 @@ export default async function handler(req, res) {
   const resultList = Array.from(keywords).map(k => [k]);
   resultList.unshift(["Sugerencias de Google"]); // Añade la cabecera
 
+
+try {
+      const timestamp = Date.now();
+      const logEntry = {
+          keyword: req.body.keyword,
+          country: req.body.country,
+          language: req.body.language,
+          date: new Date().toISOString(),
+      };
+      
+      // Guardar el objeto de log con una clave única
+      await redis.set(`search_log:${timestamp}`, JSON.stringify(logEntry));
+      
+  } catch (error) {
+      console.error("Error al guardar log en Upstash Redis:", error);
+  }
+
+
   res.status(200).json({ data: resultList });
+
+
+
 }
