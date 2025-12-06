@@ -196,9 +196,15 @@ export default function Home() {
         )}
       </div>
       <div style={{ textAlign: 'center', marginTop: '40px', marginBottom: '20px', fontFamily: 'Arial, sans-serif' }}>
-        <p style={{ fontSize: '0.85em', color: '#555' }}>
+        <p style={{ fontSize: '0.85em', color: '#555', marginBottom: '8px' }}>
           <a href="https://profile-builder-discover.streamlit.app/" target="_blank" rel="noopener noreferrer" style={{ color: '#0070f3', textDecoration: 'none' }}>
             Google Profile URL Builder
+          </a>
+        </p>
+
+        <p style={{ fontSize: '0.85em', color: '#555', marginBottom: '8px' }}>
+          <a href="https://meli-suggest.streamlit.app/" target="_blank" rel="noopener noreferrer" style={{ color: '#0070f3', textDecoration: 'none' }}>
+            MeLi Suggest - Sugerencias de Mercado Libre
           </a>
         </p>
       </div>
