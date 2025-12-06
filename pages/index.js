@@ -128,7 +128,7 @@ export default function Home() {
           Por <a href="https://www.linkedin.com/in/dtaubaso/" target="_blank" rel="noopener noreferrer" style={{ color: '#0070f3', textDecoration: 'none' }}>Damian Taubaso</a>
         </p>
         
-        <p>Introduce una palabra clave, selecciona la región y el idioma de los resultados de autocompletado.</p>
+        <p>Introduce una palabra clave (keyword), selecciona la región y el idioma de los resultados de autocompletado.</p>
         
         <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', padding: '20px', border: '1px solid #0070f3', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
           
