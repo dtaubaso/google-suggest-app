@@ -1,40 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# 🔍 Google Suggest Keyword Harvester (Buscador de Sugerencias de Google)
 
-## Getting Started
+---
 
-First, run the development server:
+## 🚀 Descripción General del Proyecto
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Esta es una aplicación web full-stack, diseñada para **extraer sugerencias de autocompletado** (Google Suggest/Autocomplete) de Google. Simula las búsquedas basadas en palabras clave, preguntas comunes, y caracteres alfabéticos/numéricos, tal como lo haría el script original de Google Apps Script, pero optimizado para ser un servicio *serverless* y desplegable en Vercel.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La herramienta es ideal para investigadores de palabras clave, especialistas en SEO (Search Engine Optimization) y *content marketers* que necesitan obtener listas extensas de ideas de contenido basadas en la intención de búsqueda real del usuario en diferentes países e idiomas.
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+### Características Principales
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+* **Búsqueda exhaustiva:** Utiliza el método de "pregunta + palabra clave" y "letra + palabra clave" para maximizar la recolección de sugerencias.
+* **Segmentación Geográfica:** Permite seleccionar el país de origen de la búsqueda (`gl`), incluyendo la mayoría de países de Latinoamérica y España.
+* **Segmentación Lingüística:** Permite seleccionar el idioma de las sugerencias (`hl`), incluyendo español (`es`), español latinoamericano (`es-419`), inglés (`en`) y portugués (`pr`).
+* **Exportación a CSV:** Permite la descarga de los resultados en un archivo CSV con codificación UTF-8, garantizando que los caracteres especiales (acentos, ñ) se muestren correctamente en Excel/Sheets.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## ⚙️ Tecnologías Utilizadas
 
-## Learn More
+Este proyecto fue construido utilizando la arquitectura moderna de desarrollo web:
 
-To learn more about Next.js, take a look at the following resources:
+* **Frontend:** [React.js](https://reactjs.org/) (incluido en Next.js) para la interfaz de usuario.
+* **Backend / Serverless:** [Next.js API Routes](https://nextjs.org/docs/api-routes/introduction) (Node.js) para manejar la lógica de *scraping* de la API de Google y evitar problemas de CORS.
+* **Despliegue:** Optimizado para [Vercel](https://vercel.com/).
+* **Librerías Clave:**
+    * `node-fetch`: Para realizar peticiones HTTP en el *backend*.
+    * `xml2js`: Para parsear la respuesta XML que devuelve el *endpoint* de sugerencias de Google.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🔧 Instalación y Ejecución Local
 
-## Deploy on Vercel
+Sigue estos pasos para configurar y ejecutar la aplicación en tu máquina local.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Requisitos
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+Necesitas tener instalado [Node.js](https://nodejs.org/) (versión 18+) y npm.
+
+### Pasos
+
+1.  **Clonar el Repositorio** (asumiendo que ya tienes tu código en un repositorio git):
+
+    ```bash
+    git clone [URL_DE_TU_REPOSITORIO]
+    cd google-suggest-app
+    ```
+
+2.  **Instalar Dependencias:**
+
+    ```bash
+    npm install
+    # o si usas yarn:
+    # yarn install
+    ```
+
+3.  **Ejecutar el Servidor de Desarrollo:**
+
+    ```bash
+    npm run dev
+    # o si usas yarn:
+    # yarn dev
+    ```
+
+4.  **Acceder a la Aplicación:**
+
+    Abre tu navegador y navega a: `http://localhost:3000`
+
+---
+
+## 🗺️ Despliegue en Vercel
+
+Dado que esta aplicación utiliza **Next.js**, el despliegue en Vercel es directo y muy simple.
+
+1.  **Crea una Cuenta Vercel:** Si no tienes una, regístrate en [Vercel](https://vercel.com/).
+2.  **Conecta tu Repositorio:** Importa tu proyecto (GitHub, GitLab o Bitbucket) a Vercel.
+3.  **Configuración Automática:** Vercel detectará automáticamente que se trata de un proyecto Next.js y configurará las API Routes como funciones *serverless*.
+4.  **Despliegue:** Haz clic en **Deploy**. La aplicación estará disponible en una URL pública en minutos.
+
+---
+
+## ⚠️ Nota Importante sobre Google Suggest
+
+La API utilizada (`http://suggestqueries.google.com/...`) no es una API oficial y puede cambiar o ser deshabilitada por Google en cualquier momento. Su uso intensivo podría resultar en bloqueos temporales de IP.
+
+---
+
+
