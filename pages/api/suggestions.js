@@ -127,8 +127,14 @@ export default async function handler(req, res) {
     // 3. Eliminar duplicados y formatear
     const uniqueMap = new Map();
     finalResults.forEach(item => {
-        // Usamos la sugerencia como clave para asegurar unicidad
-        uniqueMap.set(item.sugerencia, item);
+        const suggestionKey = item.sugerencia; // Clave: la sugerencia misma
+        
+        // 💡 CORRECCIÓN CLAVE: Solo establecer la clave si NO existe.
+        // Esto garantiza que la sugerencia conserva la CATEGORÍA de la PRIMERA expansión
+        // que la encontró (que suele ser la más simple/directa, como "Base (K)" si no se repite).
+        if (!uniqueMap.has(suggestionKey)) {
+             uniqueMap.set(suggestionKey, item);
+        }
     });
 
     const uniqueResults = Array.from(uniqueMap.values());
