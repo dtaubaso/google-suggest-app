@@ -116,6 +116,8 @@ export default async function handler(req, res) {
     const año_siguiente = año_actual + 1;
     const año_anterior = año_actual - 1;
 
+    const preguntas_del_idioma = preguntasMap[langKey] || preguntasMap['es'];
+
     // 1. Definir todas las expansiones (MODIFICADO para usar meses_del_idioma y año_siguiente/anterior)
     const expansiones = {
         "Base (K)": [keyword], 
@@ -132,7 +134,7 @@ export default async function handler(req, res) {
 
         "Alfabeto (K + L)": alfabetos.map(l => `${keyword} ${l}`),
         "Números (K + N)": numeros.map(n => `${keyword} ${n}`),
-        "Preguntas (P + K)": preguntas[langKey].map(p => `${p} ${keyword}`), // Preguntas ya usa langKey
+        "Preguntas (P + K)": preguntas_del_idioma.map(p => `${p} ${keyword}`), 
     };
 
     let finalResults = [];
