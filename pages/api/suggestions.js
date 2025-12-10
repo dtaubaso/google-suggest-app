@@ -33,8 +33,7 @@ const preguntasMap = {
 };
 
 // Función auxiliar para obtener y parsear sugerencias (XML)
-async function fetchSuggestions(query, language, country, category) {
-    
+async function fetchSuggestions(query, language, country, category, consultaOriginal) {    
     // 💡 USAMOS EL CLIENTE XML/TOOLBAR ORIGINAL
     const params_base = new URLSearchParams({
         output: "toolbar", // Cliente XML
@@ -69,10 +68,11 @@ async function fetchSuggestions(query, language, country, category) {
         }
 
         // Mapear los resultados al formato deseado (Solo categoria y sugerencia)
-        return sugerencias.map(s => ({
-            categoria: category,
-            sugerencia: s,
-        }));
+       return sugerencias.map(s => ({
+        categoria: category,
+        consulta: consultaOriginal, // <-- CLAVE: Trazar la consulta que generó la sugerencia
+        sugerencia: s,
+    }));
 
     } catch (error) {
         console.error(`Error al obtener sugerencias para "${query}" o parsear XML:`, error);
@@ -97,8 +97,9 @@ export default async function handler(req, res) {
 
     // 1. Definir todas las expansiones
     const expansiones = {
-        "Base": [keyword],
-        "Mes y Año": [
+        // 💡 AÑADIDO: Ejecución de la Keyword Base (solo la KW)
+        "Base (K)": [keyword], 
+        "Mes y Año (K + T)": [
             `${keyword} ${mes_actual}`, 
             `${keyword} ${año_actual}`
         ],
@@ -109,10 +110,11 @@ export default async function handler(req, res) {
 
     let finalResults = [];
 
-    // 2. Ejecutar todas las expansiones de forma concurrente
+    // 2. Ejecutar todas las expansiones (MODIFICADO para incluir la consulta)
     for (const [categoria, consultas] of Object.entries(expansiones)) {
         for (const consulta of consultas) {
-            const results = await fetchSuggestions(consulta, language, glCode, categoria);
+            // El fetchSuggestions debe devolver la 'consulta' para rastrearla
+            const results = await fetchSuggestions(consulta, language, glCode, categoria, consulta);
             finalResults.push(...results);
         }
     }

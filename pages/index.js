@@ -61,11 +61,10 @@ const summarizeResults = (data) => {
 const exportToCSV = (data, keyword) => {
     // data es un array de objetos: [{categoria: "...", sugerencia: "..."}, ...]
     
-    const headers = ["categoria", "sugerencia"];
+    const headers = ["categoria", "consulta", "sugerencia"];
     
     const csvRows = data.map(row => 
-        // Usamos comillas dobles para la sugerencia para manejar comas internas
-        `${row.categoria},"${row.sugerencia.replace(/"/g, '""')}"`
+        `${row.categoria},"${row.consulta.replace(/"/g, '""')}", "${row.sugerencia.replace(/"/g, '""')}"`
     );
     
     const csvContent = [
@@ -234,14 +233,18 @@ export default function Home() {
             <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
               <thead>
                 <tr>
-                  <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'left', backgroundColor: '#e6f7ff', width: '30%' }}>Categoría</th>
-                  <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'left', backgroundColor: '#e6f7ff', width: '70%' }}>Sugerencia</th>
+                  <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'left', backgroundColor: '#e6f7ff', width: '20%' }}>Categoría</th>
+                  {/* 💡 AÑADIDO: Columna Consulta */}
+                  <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'left', backgroundColor: '#e6f7ff', width: '30%' }}>Consulta</th> 
+                  <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'left', backgroundColor: '#e6f7ff', width: '50%' }}>Sugerencia</th>
                 </tr>
               </thead>
               <tbody>
                 {results.map((item, index) => (
                   <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f0f0f0' }}>
                     <td style={{ border: '1px solid #ddd', padding: '10px' }}>{item.categoria}</td>
+                    {/* 💡 MOSTRAR ITEM.CONSULTA */}
+                    <td style={{ border: '1px solid #ddd', padding: '10px' }}>{item.consulta}</td>
                     <td style={{ border: '1px solid #ddd', padding: '10px' }}>{item.sugerencia}</td>
                   </tr>
                 ))}
