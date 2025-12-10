@@ -2,6 +2,7 @@
 
 import fetch from 'node-fetch';
 import { Redis } from '@upstash/redis'; 
+import { parseStringPromise } from 'xml2js';
 
 // Inicialización de Redis (Asegúrate de que estas variables estén configuradas en Vercel)
 const redis = new Redis({
