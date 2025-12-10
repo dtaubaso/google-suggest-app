@@ -31,13 +31,15 @@ const preguntasMap = {
     pr: preguntas_pr,
 };
 
-// --- FUNCIÓN PRINCIPAL DE SCRAPING ---
+// Función auxiliar para obtener y parsear sugerencias (XML)
 async function fetchSuggestions(query, language, country, category) {
+    
+    // 💡 USAMOS EL CLIENTE XML/TOOLBAR ORIGINAL
     const params_base = new URLSearchParams({
-        client: "chrome", // Clave para obtener respuesta JSON con relevancia
-        hl: language,     // Idioma
-        gl: country,      // País
-        q: query          // Consulta
+        output: "toolbar", // Cliente XML
+        hl: language,      // Idioma
+        gl: country,       // País
+        q: query           // Consulta
     });
     
     const url = `${BASE_URL}?${params_base.toString()}`;
@@ -45,19 +47,26 @@ async function fetchSuggestions(query, language, country, category) {
     try {
         const response = await fetch(url);
         
-        // El cliente=chrome debería devolver un JSON que Node.js puede parsear directamente
-        // Sin necesidad de buffer o latin1. Si hay problemas, ajustamos.
-        const data = await response.json(); 
+        // 1. Obtener buffer y decodificar a 'latin1' (ISO-8859-1) para corregir acentos y ñ
+        const arrayBuffer = await response.arrayBuffer(); 
+        const buffer = Buffer.from(arrayBuffer);
+        const xml = buffer.toString('latin1'); // **Corrección de codificación**
         
-        // Estructura de la respuesta JSON del cliente chrome:
-        // [ "consulta", [sugerencias], ..., [metadatos de relevancia] ]
+        // 2. Parsear el XML
+        const result = await parseStringPromise(xml, { explicitArray: false, ignoreAttrs: false });
         
         let sugerencias = [];
 
-        if (Array.isArray(data) && data.length > 1 && Array.isArray(data[1])) {
-            sugerencias = data[1];
-        }
+        // Navegar a través de la estructura XML para obtener las sugerencias
+        const xmlSuggestions = result.toplevel?.CompleteSuggestion;
         
+        if (Array.isArray(xmlSuggestions)) {
+            sugerencias = xmlSuggestions.map(s => s.suggestion?.$?.data).filter(s => s);
+        } else if (xmlSuggestions) { 
+            const data = xmlSuggestions.suggestion?.$?.data;
+            if (data) sugerencias.push(data);
+        }
+
         // Mapear los resultados al formato deseado (Solo categoria y sugerencia)
         return sugerencias.map(s => ({
             categoria: category,
@@ -65,7 +74,7 @@ async function fetchSuggestions(query, language, country, category) {
         }));
 
     } catch (error) {
-        console.error(`Error al obtener sugerencias para "${query}":`, error);
+        console.error(`Error al obtener sugerencias para "${query}" o parsear XML:`, error);
         return [];
     }
 }
