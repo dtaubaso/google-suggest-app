@@ -14,7 +14,23 @@ const redis = new Redis({
 const BASE_URL = "https://suggestqueries.google.com/complete/search";
 
 // Expansiones para ES (Mantenemos preguntas en español como en tu script)
-const meses_es = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+const meses = {
+    // Español (es / es-419)
+    es: [
+        "enero", "febrero", "marzo", "abril", "mayo", "junio", 
+        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+    ],
+    // Inglés (en)
+    en: [
+        "january", "february", "march", "april", "may", "june", 
+        "july", "august", "september", "october", "november", "december"
+    ],
+    // Portugués (pr)
+    pr: [
+        "janeiro", "fevereiro", "março", "abril", "maio", "junho", 
+        "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
+    ]
+};
 const alfabetos = [...Array(26)].map((_, i) => String.fromCharCode(97 + i)); // a-z
 const numeros = [...Array(10)].map((_, i) => (i + 1).toString()); // 1-10
 
@@ -91,23 +107,32 @@ export default async function handler(req, res) {
     const { keyword, country, language } = req.body;
     const glCode = country === 'pr' ? 'us' : country; 
 
-    const now = new Date();
-    const mes_actual_index = now.getMonth(); // 0 a 11
-    const mes_actual = meses_es[mes_actual_index];
-    const año_actual = now.getFullYear().toString();
-    const preguntas = preguntasMap[language] || preguntas_es;
+   // Determinar el idioma de los meses
+    const langKey = language.startsWith('es') ? 'es' : (language === 'en' ? 'en' : 'pr');
+    const meses_del_idioma = meses[langKey] || meses['es']; // Fallback a español
+    
+    // Obtener los valores temporales
+    const año_actual = new Date().getFullYear();
+    const año_siguiente = año_actual + 1;
+    const año_anterior = año_actual - 1;
 
-    // 1. Definir todas las expansiones
+    // 1. Definir todas las expansiones (MODIFICADO para usar meses_del_idioma y año_siguiente/anterior)
     const expansiones = {
-        // 💡 AÑADIDO: Ejecución de la Keyword Base (solo la KW)
         "Base (K)": [keyword], 
-        "Mes y Año (K + T)": [
-            `${keyword} ${mes_actual}`, 
-            `${keyword} ${año_actual}`
+        
+        // 💡 MODIFICADO: Uso de los meses en el idioma correcto
+        "Meses (K + M)": meses_del_idioma.map(m => `${keyword} ${m}`), 
+        
+        // Uso de años (Actual, Siguiente, Anterior)
+        "Años (K + A)": [
+            `${keyword} ${año_actual}`, 
+            `${keyword} ${año_siguiente}`,
+            `${keyword} ${año_anterior}`,
         ],
+
         "Alfabeto (K + L)": alfabetos.map(l => `${keyword} ${l}`),
         "Números (K + N)": numeros.map(n => `${keyword} ${n}`),
-        "Preguntas (P + K)": preguntas.map(p => `${p} ${keyword}`),
+        "Preguntas (P + K)": preguntas[langKey].map(p => `${p} ${keyword}`), // Preguntas ya usa langKey
     };
 
     let finalResults = [];
