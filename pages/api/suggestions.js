@@ -53,26 +53,28 @@ async function fetchSuggestions(query, language, country, category, consultaOrig
         const xml = buffer.toString('latin1'); // **Corrección de codificación**
         
         // 2. Parsear el XML
+        // NOTA: xml2js fue inicializado con explicitArray: false para simplificar la estructura
         const result = await parseStringPromise(xml, { explicitArray: false, ignoreAttrs: false });
         
         let sugerencias = [];
 
-        // Navegar a través de la estructura XML para obtener las sugerencias
+        // Obtener el potencial array de sugerencias
         const xmlSuggestions = result.toplevel?.CompleteSuggestion;
         
-        if (Array.isArray(xmlSuggestions)) {
-            sugerencias = xmlSuggestions.map(s => s.suggestion?.$?.data).filter(s => s);
-        } else if (xmlSuggestions) { 
-            const data = xmlSuggestions.suggestion?.$?.data;
-            if (data) sugerencias.push(data);
-        }
+        // 💡 CORRECCIÓN CLAVE: Asegurar que xmlSuggestions sea un array, incluso si es un solo elemento.
+        const suggestionsArray = Array.isArray(xmlSuggestions) ? xmlSuggestions : (xmlSuggestions ? [xmlSuggestions] : []);
+        
+        // Mapear los datos de sugerencia
+        sugerencias = suggestionsArray
+            .map(s => s.suggestion?.$?.data)
+            .filter(s => s); // Filtrar nulos o vacíos
 
-        // Mapear los resultados al formato deseado (Solo categoria y sugerencia)
-       return sugerencias.map(s => ({
-        categoria: category,
-        consulta: consultaOriginal, // <-- CLAVE: Trazar la consulta que generó la sugerencia
-        sugerencia: s,
-    }));
+        // Mapear los resultados al formato deseado (AÑADIDO: consultaOriginal)
+        return sugerencias.map(s => ({
+            categoria: category,
+            consulta: consultaOriginal, 
+            sugerencia: s,
+        }));
 
     } catch (error) {
         console.error(`Error al obtener sugerencias para "${query}" o parsear XML:`, error);
