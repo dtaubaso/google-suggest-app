@@ -1,6 +1,6 @@
 // Archivo: pages/index.js
 import { useState } from 'react';
-import Head from 'next/head'; // 💡 IMPORTANTE: Importar el componente Head
+import Head from 'next/head';
 
 // --- ESTILO PARA EL SPINNER (Animación de carga) ---
 const spinnerStyle = {
@@ -14,9 +14,6 @@ const spinnerStyle = {
   marginRight: '8px',
 };
 
-// Next.js permite agregar CSS globalmente.
-// Si esto se ejecutara fuera de un ambiente de React/Next.js, necesitarías agregar esta regla CSS globalmente.
-// En un archivo .css o dentro de <style> en el componente.
 const globalStyles = `
   @keyframes spin {
     0% { transform: rotate(0deg); }
@@ -24,7 +21,7 @@ const globalStyles = `
   }
 `;
 
-// Conjuntos de idioma (hl) para el parámetro de Google
+// --- DEFINICIONES DE SELECCIÓN ---
 const questionSets = {
   es: "Español (España)",
   "es-419": "Español (Latinoamérica)",
@@ -32,7 +29,6 @@ const questionSets = {
   pr: "Portugués (PR)",
 };
 
-// Países permitidos (gl) para el parámetro de Google (Sin orden alfabético inicial)
 const countriesMap = {
   ar: "Argentina", mx: "México", gt: "Guatemala", hn: "Honduras", sv: "El Salvador", 
   ni: "Nicaragua", cr: "Costa Rica", pa: "Panamá", do: "República Dominicana", pr: "Puerto Rico", 
@@ -40,41 +36,70 @@ const countriesMap = {
   uy: "Uruguay", py: "Paraguay", br: "Brasil", es: "España", us: "EE. UU. (Resto)",
 };
 
-// Función para exportar a CSV
-const exportToCSV = (data, keyword) => {
-  const csvContent = data.map(e => e.join(",")).join("\n");
-  const bom = "\ufeff"; 
-  
-  // 💡 CLAVE: Generar un timestamp numérico (similar a int(time.time()) de Python)
-  // Date.now() devuelve milisegundos. Dividimos por 1000 y usamos Math.floor para obtener segundos enteros.
-  const timestamp = Math.floor(Date.now() / 1000); 
-  
-  // Limpiar la palabra clave y construir el nombre del archivo
-  const safeKeyword = keyword.replace(/\s/g, '_').replace(/[^a-zA-Z0-9_]/g, ''); // Eliminar caracteres especiales
-  const filename = `sugerencias_${safeKeyword}_${timestamp}.csv`;
-  
-  const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  
-  link.setAttribute('href', url);
-  link.setAttribute('download', filename); // Usamos el nombre de archivo único
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
-
 // --- ORDENAR PAÍSES ALFABÉTICAMENTE ---
 const sortedCountries = Object.entries(countriesMap)
   .sort(([, nameA], [, nameB]) => nameA.localeCompare(nameB));
 
+// --- FUNCIONES AUXILIARES ---
 
+// Función para agrupar y contar las sugerencias por categoría
+const summarizeResults = (data) => {
+    const summary = data.reduce((acc, item) => {
+        const category = item.categoria;
+        if (!acc[category]) {
+            acc[category] = 0;
+        }
+        acc[category]++;
+        return acc;
+    }, {});
+    
+    // Devolver un array ordenado por el total de sugerencias (descendente)
+    return Object.entries(summary).sort(([, countA], [, countB]) => countB - countA);
+};
+
+// Función para exportar a CSV
+const exportToCSV = (data, keyword) => {
+    // data es un array de objetos: [{categoria: "...", sugerencia: "..."}, ...]
+    
+    const headers = ["categoria", "sugerencia"];
+    
+    // Mapear los objetos a filas de CSV
+    const csvRows = data.map(row => 
+        // Usamos comillas dobles para la sugerencia para manejar comas internas
+        `${row.categoria},"${row.sugerencia.replace(/"/g, '""')}"`
+    );
+    
+    const csvContent = [
+        headers.join(','), // Cabecera
+        ...csvRows          // Filas
+    ].join('\n');
+    
+    const bom = "\ufeff"; 
+    const timestamp = Math.floor(Date.now() / 1000); 
+    
+    const safeKeyword = keyword.replace(/\s/g, '_').replace(/[^a-zA-Z0-9_]/g, ''); 
+    const filename = `sugerencias_expandidas_${safeKeyword}_${timestamp}.csv`;
+    
+    const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename); 
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+
+// --- COMPONENTE PRINCIPAL ---
 export default function Home() {
   const [keyword, setKeyword] = useState('');
   const [country, setCountry] = useState('ar'); 
   const [language, setLanguage] = useState('es-419'); 
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState([]); // Almacena [{categoria, sugerencia}, ...]
+  const [summary, setSummary] = useState([]); // Almacena el resumen por categoría
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -82,6 +107,7 @@ export default function Home() {
     e.preventDefault();
     setLoading(true);
     setResults([]);
+    setSummary([]);
     setError(null);
 
     const glCode = country === 'pr' ? 'us' : country; 
@@ -98,10 +124,12 @@ export default function Home() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Ocurrió un error en el servidor. Revisa el terminal de VS Code para más detalles.');
+        throw new Error(data.error || 'Ocurrió un error en el servidor. Revise los logs.');
       }
 
-      setResults(data.data);
+      const processedResults = data.data || [];
+      setResults(processedResults);
+      setSummary(summarizeResults(processedResults));
     } catch (err) {
       setError(err.message);
       console.error(err);
@@ -113,7 +141,6 @@ export default function Home() {
 
   return (
     <>
-      {/* 💡 AÑADIDO: Título de la página para la pestaña del navegador */}
       <Head>
         <title>Google Suggest Tool | Keyword Harvester SEO</title>
       </Head>
@@ -123,12 +150,11 @@ export default function Home() {
 
         <h1>🔍 Buscador de Sugerencias de Google</h1>
         
-        {/* 💡 AÑADIDO: Crédito y enlace con tipografía más pequeña */}
         <p style={{ fontSize: '0.85em', color: '#555', marginTop: '-10px', marginBottom: '20px' }}>
-          Por <a href="https://www.linkedin.com/in/dtaubaso/" target="_blank" rel="noopener noreferrer" style={{ color: '#0070f3', textDecoration: 'none' }}>Damian Taubaso</a>
+          Por: <a href="https://www.linkedin.com/in/dtaubaso/" target="_blank" rel="noopener noreferrer" style={{ color: '#0070f3', textDecoration: 'none' }}>Damian Taubaso</a>
         </p>
         
-        <p>Introduce una palabra clave (keyword), selecciona la región y el idioma de los resultados de autocompletado.</p>
+        <p>Introduce una palabra clave y configura la segmentación de la búsqueda.</p>
         
         <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', padding: '20px', border: '1px solid #0070f3', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
           
@@ -168,45 +194,78 @@ export default function Home() {
 
         {error && <p style={{ color: 'red', marginTop: '20px' }}>⚠️ Error: {error}</p>}
 
+        {/* --- Sección de Resultados --- */}
         {results.length > 0 && (
           <div style={{ marginTop: '30px' }}>
-            <h2>Resultados ({results.length > 1 ? results.length - 1 : 0} Sugerencias)</h2>
+            <h2>Resultados Encontrados ({results.length} Sugerencias Únicas)</h2>
+            
             <button 
-              onClick={() => exportToCSV(results, keyword)}
+              onClick={() => {
+                const password = prompt("Por favor, introduce la contraseña de exportación:");
+                if (password) {
+                    // El endpoint de exportación requiere la contraseña en el query
+                    window.open(`/api/export?pass=${password}`, '_blank');
+                } else {
+                    alert("Exportación cancelada.");
+                }
+              }}
               style={{ padding: '10px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginBottom: '15px' }}
             >
-              Descargar CSV
+              Descargar Historial de Logs (Requiere Contraseña)
             </button>
             
-            <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
+            {/* TABLA DE RESULTADOS AGRUPADOS */}
+            <h3 style={{ borderBottom: '1px solid #ccc', paddingBottom: '5px' }}>Detalle de Sugerencias</h3>
+            <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd', marginBottom: '30px' }}>
               <thead>
                 <tr>
-                  <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'left', backgroundColor: '#e6f7ff' }}>Palabra Clave</th>
+                  <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'left', backgroundColor: '#e6f7ff', width: '30%' }}>Categoría</th>
+                  <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'left', backgroundColor: '#e6f7ff', width: '70%' }}>Sugerencia</th>
                 </tr>
               </thead>
               <tbody>
-                {results.slice(1).map((row, index) => (
+                {results.map((item, index) => (
                   <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f0f0f0' }}>
-                    <td style={{ border: '1px solid #ddd', padding: '10px' }}>{row[0]}</td>
+                    <td style={{ border: '1px solid #ddd', padding: '10px' }}>{item.categoria}</td>
+                    <td style={{ border: '1px solid #ddd', padding: '10px' }}>{item.sugerencia}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
+            {/* RESUMEN POR CATEGORÍA */}
+            <h3 style={{ borderBottom: '1px solid #ccc', paddingBottom: '5px' }}>Resumen por Categoría</h3>
+            <table style={{ width: '50%', minWidth: '300px', borderCollapse: 'collapse', border: '1px solid #ccc' }}>
+              <thead>
+                  <tr>
+                      <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left', backgroundColor: '#e6f7ff' }}>Categoría</th>
+                      <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'right', backgroundColor: '#e6f7ff' }}>Total Sugerencias</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {summary.map(([category, count]) => (
+                      <tr key={category}>
+                          <td style={{ border: '1px solid #ccc', padding: '8px' }}>{category}</td>
+                          <td style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'right' }}>{count}</td>
+                      </tr>
+                  ))}
+                  <tr style={{ fontWeight: 'bold', backgroundColor: '#f2f2f2' }}>
+                      <td style={{ border: '1px solid #ccc', padding: '8px' }}>TOTAL ÚNICO</td>
+                      <td style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'right' }}>{results.length}</td>
+                  </tr>
+              </tbody>
+            </table>
+
+            {/* Botón para descargar solo los resultados actuales */}
+            <button 
+              onClick={() => exportToCSV(results, keyword)}
+              style={{ padding: '10px 15px', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '20px' }}
+            >
+              Descargar Resultados Actuales a CSV
+            </button>
+
           </div>
         )}
-      </div>
-      <div style={{ textAlign: 'center', marginTop: '40px', marginBottom: '20px', fontFamily: 'Arial, sans-serif' }}>
-        <p style={{ fontSize: '0.85em', color: '#555', marginBottom: '8px' }}>
-          <a href="https://profile-builder-discover.streamlit.app/" target="_blank" rel="noopener noreferrer" style={{ color: '#0070f3', textDecoration: 'none' }}>
-            Google Profile URL Builder
-          </a>
-        </p>
-
-        <p style={{ fontSize: '0.85em', color: '#555', marginBottom: '8px' }}>
-          <a href="https://meli-suggest.streamlit.app/" target="_blank" rel="noopener noreferrer" style={{ color: '#0070f3', textDecoration: 'none' }}>
-            MeLi Suggest - Sugerencias de Mercado Libre
-          </a>
-        </p>
       </div>
     </>
   );
