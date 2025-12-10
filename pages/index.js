@@ -63,7 +63,6 @@ const exportToCSV = (data, keyword) => {
     
     const headers = ["categoria", "sugerencia"];
     
-    // Mapear los objetos a filas de CSV
     const csvRows = data.map(row => 
         // Usamos comillas dobles para la sugerencia para manejar comas internas
         `${row.categoria},"${row.sugerencia.replace(/"/g, '""')}"`
@@ -199,43 +198,9 @@ export default function Home() {
           <div style={{ marginTop: '30px' }}>
             <h2>Resultados Encontrados ({results.length} Sugerencias Únicas)</h2>
             
-            <button 
-              onClick={() => {
-                const password = prompt("Por favor, introduce la contraseña de exportación:");
-                if (password) {
-                    // El endpoint de exportación requiere la contraseña en el query
-                    window.open(`/api/export?pass=${password}`, '_blank');
-                } else {
-                    alert("Exportación cancelada.");
-                }
-              }}
-              style={{ padding: '10px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginBottom: '15px' }}
-            >
-              Descargar Historial de Logs (Requiere Contraseña)
-            </button>
-            
-            {/* TABLA DE RESULTADOS AGRUPADOS */}
-            <h3 style={{ borderBottom: '1px solid #ccc', paddingBottom: '5px' }}>Detalle de Sugerencias</h3>
-            <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd', marginBottom: '30px' }}>
-              <thead>
-                <tr>
-                  <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'left', backgroundColor: '#e6f7ff', width: '30%' }}>Categoría</th>
-                  <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'left', backgroundColor: '#e6f7ff', width: '70%' }}>Sugerencia</th>
-                </tr>
-              </thead>
-              <tbody>
-                {results.map((item, index) => (
-                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f0f0f0' }}>
-                    <td style={{ border: '1px solid #ddd', padding: '10px' }}>{item.categoria}</td>
-                    <td style={{ border: '1px solid #ddd', padding: '10px' }}>{item.sugerencia}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {/* RESUMEN POR CATEGORÍA */}
+            {/* 1. RESUMEN POR CATEGORÍA (MANTENIDO ARRIBA) */}
             <h3 style={{ borderBottom: '1px solid #ccc', paddingBottom: '5px' }}>Resumen por Categoría</h3>
-            <table style={{ width: '50%', minWidth: '300px', borderCollapse: 'collapse', border: '1px solid #ccc' }}>
+            <table style={{ width: '50%', minWidth: '300px', borderCollapse: 'collapse', border: '1px solid #ccc', marginBottom: '30px' }}>
               <thead>
                   <tr>
                       <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left', backgroundColor: '#e6f7ff' }}>Categoría</th>
@@ -255,15 +220,34 @@ export default function Home() {
                   </tr>
               </tbody>
             </table>
-
-            {/* Botón para descargar solo los resultados actuales */}
+            
+            {/* 2. BOTÓN DE DESCARGA CSV (QUEDA SOLO ESTE) */}
             <button 
               onClick={() => exportToCSV(results, keyword)}
-              style={{ padding: '10px 15px', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginTop: '20px' }}
+              style={{ padding: '10px 15px', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginBottom: '20px' }}
             >
               Descargar Resultados Actuales a CSV
             </button>
 
+            {/* 3. TABLA DE DETALLE */}
+            <h3 style={{ borderBottom: '1px solid #ccc', paddingBottom: '5px' }}>Detalle de Sugerencias</h3>
+            <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
+              <thead>
+                <tr>
+                  <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'left', backgroundColor: '#e6f7ff', width: '30%' }}>Categoría</th>
+                  <th style={{ border: '1px solid #ddd', padding: '10px', textAlign: 'left', backgroundColor: '#e6f7ff', width: '70%' }}>Sugerencia</th>
+                </tr>
+              </thead>
+              <tbody>
+                {results.map((item, index) => (
+                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f0f0f0' }}>
+                    <td style={{ border: '1px solid #ddd', padding: '10px' }}>{item.categoria}</td>
+                    <td style={{ border: '1px solid #ddd', padding: '10px' }}>{item.sugerencia}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            
           </div>
         )}
       </div>
