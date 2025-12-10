@@ -115,8 +115,11 @@ export default async function handler(req, res) {
     // 2. Ejecutar todas las expansiones (MODIFICADO para incluir la consulta)
     for (const [categoria, consultas] of Object.entries(expansiones)) {
         for (const consulta of consultas) {
-            // El fetchSuggestions debe devolver la 'consulta' para rastrearla
             const results = await fetchSuggestions(consulta, language, glCode, categoria, consulta);
+            // Depuración: muestra cuántos resultados se obtienen para la consulta base
+            if (categoria === "Base (K)") {
+                console.log("Resultados para Base (K):", results);
+            }
             finalResults.push(...results);
         }
     }
