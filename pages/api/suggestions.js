@@ -120,21 +120,21 @@ export default async function handler(req, res) {
 
     // 1. Definir todas las expansiones (MODIFICADO para usar meses_del_idioma y año_siguiente/anterior)
     const expansiones = {
-        "Base (K)": [keyword], 
+        "Base": [keyword], 
         
         // 💡 MODIFICADO: Uso de los meses en el idioma correcto
-        "Meses (K + M)": meses_del_idioma.map(m => `${keyword} ${m}`), 
+        "Meses": meses_del_idioma.map(m => `${keyword} ${m}`), 
         
         // Uso de años (Actual, Siguiente, Anterior)
-        "Años (K + A)": [
+        "Años": [
             `${keyword} ${año_actual}`, 
             `${keyword} ${año_siguiente}`,
             `${keyword} ${año_anterior}`,
         ],
 
-        "Alfabeto (K + L)": alfabetos.map(l => `${keyword} ${l}`),
-        "Números (K + N)": numeros.map(n => `${keyword} ${n}`),
-        "Preguntas (P + K)": preguntas_del_idioma.map(p => `${p} ${keyword}`), 
+        "Alfabeto": alfabetos.map(l => `${keyword} ${l}`),
+        "Números": numeros.map(n => `${keyword} ${n}`),
+        "Preguntas": preguntas_del_idioma.map(p => `${p} ${keyword}`), 
     };
 
     let finalResults = [];

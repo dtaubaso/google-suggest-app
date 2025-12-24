@@ -144,7 +144,7 @@ export default function Home() {
       </Head>
 
       <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
-        <link rel="stylesheet" href="/styles/responsive.css" />
+        {/* <link rel="stylesheet" href="/styles/responsive.css" /> */}
         <style dangerouslySetInnerHTML={{ __html: globalStyles }} />
 
         <h1>🔍 Buscador de Sugerencias de Google</h1>
@@ -155,41 +155,32 @@ export default function Home() {
         
         <p>Introduce una palabra clave y configura la segmentación de la búsqueda.</p>
         
-        <form onSubmit={handleSubmit} className="responsive-form">
-          
-          <input
-            type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder="Palabra Clave (ej: recetas)"
-            required
-            style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}
-          />
-          
-          <select value={country} onChange={(e) => setCountry(e.target.value)} style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}>
-            {sortedCountries.map(([code, name]) => (
-              <option key={code} value={code}>{name}</option>
-            ))}
-          </select>
-          
-          <select value={language} onChange={(e) => setLanguage(e.target.value)} style={{ padding: '10px', borderRadius: '4px', border: '1px solid #ddd' }}>
-            {Object.entries(questionSets).map(([code, name]) => (
-              <option key={code} value={code}>{name}</option>
-            ))}
-          </select>
-          
-          <button 
-            type="submit" 
-            disabled={loading || !keyword} 
-            style={{ 
-              gridColumn: 'span 3', padding: '10px', backgroundColor: '#0070f3', color: 'white', border: 'none', borderRadius: '4px', 
-              cursor: (loading || !keyword) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}
-          >
-            {loading && <div style={spinnerStyle}></div>}
-            {loading ? 'Consultando Sugerencias...' : 'Buscar Sugerencias'}
-          </button>
-        </form>
+       <form onSubmit={handleSubmit} className="responsive-form">
+        <input
+          type="text"
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          placeholder="Palabra Clave (ej: recetas)"
+          required
+        />
+        
+        <select value={country} onChange={(e) => setCountry(e.target.value)}>
+          {sortedCountries.map(([code, name]) => (
+            <option key={code} value={code}>{name}</option>
+          ))}
+        </select>
+        
+        <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+          {Object.entries(questionSets).map(([code, name]) => (
+            <option key={code} value={code}>{name}</option>
+          ))}
+        </select>
+        
+        <button type="submit" disabled={loading || !keyword}>
+          {loading && <div className="spinner"></div>}
+          {loading ? 'Consultando Sugerencias...' : 'Buscar Sugerencias'}
+        </button>
+      </form>
 
         {error && <p style={{ color: 'red', marginTop: '20px' }}>⚠️ Error: {error}</p>}
 
