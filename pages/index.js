@@ -144,6 +144,7 @@ export default function Home() {
       </Head>
 
       <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', fontFamily: 'Arial, sans-serif' }}>
+        <link rel="stylesheet" href="/styles/responsive.css" />
         <style dangerouslySetInnerHTML={{ __html: globalStyles }} />
 
         <h1>🔍 Buscador de Sugerencias de Google</h1>
@@ -154,7 +155,7 @@ export default function Home() {
         
         <p>Introduce una palabra clave y configura la segmentación de la búsqueda.</p>
         
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px', padding: '20px', border: '1px solid #0070f3', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+        <form onSubmit={handleSubmit} className="responsive-form">
           
           <input
             type="text"
