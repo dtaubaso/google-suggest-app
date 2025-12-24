@@ -33,7 +33,7 @@ const countriesMap = {
   ar: "Argentina", mx: "México", gt: "Guatemala", hn: "Honduras", sv: "El Salvador", 
   ni: "Nicaragua", cr: "Costa Rica", pa: "Panamá", do: "República Dominicana", pr: "Puerto Rico", 
   co: "Colombia", ve: "Venezuela", ec: "Ecuador", pe: "Perú", bo: "Bolivia", cl: "Chile", 
-  uy: "Uruguay", py: "Paraguay", br: "Brasil", es: "España", us: "EE. UU. (Resto)",
+  uy: "Uruguay", py: "Paraguay", br: "Brasil", es: "España", us: "EE. UU.",
 };
 
 // --- ORDENAR PAÍSES ALFABÉTICAMENTE ---
